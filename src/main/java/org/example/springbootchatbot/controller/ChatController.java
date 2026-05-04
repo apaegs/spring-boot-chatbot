@@ -10,6 +10,6 @@ public class ChatController {
 
     @PostMapping("/chat")
     public ChatResponse chat(@RequestBody ChatRequest request) {
-        return new ChatResponse("Svar kommer snart!", request.sessionId());
+        return new ChatResponse("Answer coming soon!", request.sessionId());
     }
 }
