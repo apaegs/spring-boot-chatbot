@@ -49,6 +49,12 @@ public class AiClient {
             throw new RuntimeException("AI service returned an empty response");
         }
 
-        return response.choices().getFirst().message().content();
+        var choice = response.choices().getFirst();
+
+        if (choice.message() == null || choice.message().content() == null) {
+            throw new RuntimeException("AI service returned a choice with no message content");
+        }
+
+        return choice.message().content();
     }
 }
