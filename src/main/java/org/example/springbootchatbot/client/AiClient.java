@@ -51,7 +51,7 @@ public class AiClient {
 
         var choice = response.choices().getFirst();
 
-        if (choice.message() == null || choice.message().content() == null) {
+        if (choice == null || choice.message() == null || choice.message().content() == null) {
             throw new RuntimeException("AI service returned a choice with no message content");
         }
 
