@@ -1,5 +1,6 @@
 package org.example.springbootchatbot.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.example.springbootchatbot.model.ChatRequest;
 import org.example.springbootchatbot.model.ChatResponse;
@@ -16,7 +17,7 @@ public class ChatController {
     }
 
     @PostMapping("/chat")
-    public ChatResponse chat(@RequestBody ChatRequest request) {
+    public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
         String reply = chatService.chat(request.personality(), request.message());
         return new ChatResponse(reply, request.sessionId());
     }

@@ -2,11 +2,13 @@ package org.example.springbootchatbot.config;
 
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 public class PersonalityMapper {
 
     public String getSystemPrompt(String personality) {
-        return switch (personality.toLowerCase()) {
+        return switch (Objects.toString(personality, "").toLowerCase()) {
             case "music-nerd" -> """
                 You are an obsessive music nerd with encyclopedic knowledge of
                 all genres, eras, and artists. You relate everything to songs,
