@@ -1,6 +1,7 @@
 package org.example.springbootchatbot.client;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -30,13 +31,23 @@ public class AiClient {
     public String sendMessages(List<Message> messages) {
         var request = new AiRequest(model, messages);
 
-        var response = restClient.post()
+        AiResponse response = restClient.post()
                 .uri("/chat/completions")
                 .header("Authorization", "Bearer " + apiKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                    throw new RuntimeException("AI service rejected the request: " + res.getStatusCode());
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
+                    throw new RuntimeException("AI service is unavailable: " + res.getStatusCode());
+                })
                 .body(AiResponse.class);
+
+        if (response == null || response.choices() == null || response.choices().isEmpty()) {
+            throw new RuntimeException("AI service returned an empty response");
+        }
 
         return response.choices().getFirst().message().content();
     }
