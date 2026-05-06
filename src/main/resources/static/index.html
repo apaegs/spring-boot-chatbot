@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #2b0f54;
+            font-family: 'JetBrains Mono', monospace;
+            color: #fff7f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .window {
+            border: 2px solid #fff7f8;
+            width: 640px;
+        }
+
+        .titlebar {
+            background: #fff7f8;
+            color: #2b0f54;
+            padding: 3px 8px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .titlebar .btns { display: flex; gap: 4px; }
+        .titlebar .btn {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #2b0f54;
+            background: #fff7f8;
+            cursor: pointer;
+        }
+
+        .pills {
+            display: flex;
+            border-bottom: 2px solid #fff7f8;
+        }
+
+        .pill {
+            flex: 1;
+            padding: 6px 4px;
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+            border: none;
+            border-right: 2px solid #fff7f8;
+            background: #2b0f54;
+            color: #fff7f8;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .pill:last-child { border-right: none; }
+        .pill.active { background: #fff7f8; color: #2b0f54; }
+        .pill:hover:not(.active) { background: #ab1f65; }
+
+        .messages {
+            height: 360px;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #2b0f54;
+        }
+
+        .messages::-webkit-scrollbar { width: 4px; }
+        .messages::-webkit-scrollbar-thumb { background: #ab1f65; }
+
+        .msg {
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .msg.user { color: #ffda45; }
+        .msg.bot { color: #fff7f8; }
+
+        .lbl {
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+
+        .msg.bot .lbl { color: #49e7ec; }
+        .msg.user .lbl { color: #ff8142; }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 12px;
+            background: #ff4f69;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .input-area { border-top: 2px solid #fff7f8; }
+
+        .input-titlebar {
+            background: #fff7f8;
+            color: #2b0f54;
+            padding: 3px 8px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-titlebar .btns { display: flex; gap: 4px; }
+        .input-titlebar .btn {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #2b0f54;
+            background: #fff7f8;
+            cursor: pointer;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            gap: 8px;
+            background: #2b0f54;
+        }
+
+        .prompt { font-size: 14px; color: #fff7f8; white-space: nowrap; }
+
+        .input-row input {
+            flex: 1;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            background: #fff7f8;
+            color: #2b0f54;
+            border: none;
+            outline: none;
+            caret-color: #ab1f65;
+            padding: 4px 8px;
+        }
+
+        .input-row input::placeholder { color: #ab1f65; }
+
+        .input-row button {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            padding: 4px 10px;
+            background: #fff7f8;
+            color: #2b0f54;
+            border: none;
+            cursor: pointer;
+        }
+
+        .input-row button:hover { background: #ff4f69; color: #fff7f8; }
+        .input-row button:disabled { opacity: 0.4; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="window">
+    <div class="titlebar">
+        <span>Output</span>
+        <div class="btns">
+            <div class="btn"></div>
+            <div class="btn"></div>
+        </div>
+    </div>
+
+    <div class="pills">
+        <button class="pill active" onclick="selectPersonality('music-nerd', this)">MUSIC_NERD</button>
+        <button class="pill" onclick="selectPersonality('dungeon-master', this)">DGN_MASTER</button>
+        <button class="pill" onclick="selectPersonality('expert-coder', this)">EXP_CODER</button>
+    </div>
+
+    <div class="messages" id="messages">
+        <div class="msg bot">
+            <div class="lbl">// SYSTEM</div>
+            READY. SELECT PERSONALITY AND TYPE YOUR MESSAGE.
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-titlebar">
+            <span>Input</span>
+            <div class="btns">
+                <div class="btn"></div>
+                <div class="btn"></div>
+            </div>
+        </div>
+        <div class="input-row">
+            <span class="prompt">USER:</span>
+            <input
+                    type="text"
+                    id="input"
+                    placeholder="type here..."
+                    onkeydown="if(event.key === 'Enter') sendMessage()"
+            />
+            <button id="send-btn" onclick="sendMessage()">ENTER</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPersonality = 'music-nerd';
+    let sessionId = crypto.randomUUID();
+
+    function selectPersonality(personality, el) {
+        currentPersonality = personality;
+        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        const capturedPersonality = currentPersonality;
+
+        input.value = '';
+        setLoading(true);
+        appendMessage('user', message, null);
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000);
+
+        try {
+            const response = await fetch('/api/v1/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal,
+                body: JSON.stringify({
+                    personality: capturedPersonality,
+                    message: message,
+                    sessionId: sessionId
+                })
+            });
+
+            if (!response.ok) throw new Error('Request failed');
+
+            const data = await response.json();
+            appendMessage('bot', data.reply, capturedPersonality);
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                appendMessage('bot', '** ERROR: REQUEST TIMED OUT **', null);
+            } else {
+                appendMessage('bot', '** ERROR: COULD NOT REACH AI SERVICE **', null);
+            }
+        } finally {
+            clearTimeout(timeout);
+            setLoading(false);
+        }
+    }
+
+    function appendMessage(role, text, personality) {
+        const messages = document.getElementById('messages');
+        const div = document.createElement('div');
+        div.classList.add('msg', role);
+
+        const label = document.createElement('div');
+        label.classList.add('lbl');
+        label.textContent = role === 'user' ? '// YOU' : '// ' + (personality ? personality.toUpperCase() : 'SYSTEM');
+        div.appendChild(label);
+
+        const content = document.createElement('span');
+        content.textContent = text;
+        div.appendChild(content);
+
+        if (role === 'bot') {
+            const cursor = document.createElement('span');
+            cursor.classList.add('cursor');
+            div.appendChild(cursor);
+            setTimeout(() => cursor.remove(), 3000);
+        }
+
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function setLoading(loading) {
+        const btn = document.getElementById('send-btn');
+        const input = document.getElementById('input');
+        btn.disabled = loading;
+        input.disabled = loading;
+
+        if (loading) {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.classList.add('msg', 'bot');
+            div.id = 'typing';
+            div.innerHTML = '<div class="lbl">// SYSTEM</div>PROCESSING<span class="cursor"></span>';
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        } else {
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+        }
+    }
+</script>
+
+</body>
+</html>
