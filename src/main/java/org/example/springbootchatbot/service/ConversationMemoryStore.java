@@ -1,37 +1,54 @@
 package org.example.springbootchatbot.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.example.springbootchatbot.model.Message;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class ConversationMemoryStore {
 
     private static final int MAX_HISTORY = 20;
 
-    private final ConcurrentHashMap<String, CopyOnWriteArrayList<Message>> sessions = new ConcurrentHashMap<>();
+    // Caffeine-cache som automatiskt tar bort sessioner
+    // som inte använts på X minuter eller när cachen är full
+    private final Cache<String, Deque<Message>> sessions;
+
+    public ConversationMemoryStore(
+            @Value("${conversation.session.max-size}") int maxSize,
+            @Value("${conversation.session.expire-minutes}") int expireMinutes
+    ) {
+        this.sessions = Caffeine.newBuilder()
+                .maximumSize(maxSize)
+                .expireAfterAccess(expireMinutes, TimeUnit.MINUTES)
+                .build();
+    }
 
     public List<Message> getHistory(String sessionId) {
-        CopyOnWriteArrayList<Message> history = sessions.get(sessionId);
+        Deque<Message> history = sessions.getIfPresent(sessionId);
         if (history == null) return List.of();
-        return List.copyOf(history);
+        synchronized (history) {
+            return List.copyOf(history);
+        }
     }
 
     public void addMessage(String sessionId, Message message) {
-        CopyOnWriteArrayList<Message> history = sessions.computeIfAbsent(
-                sessionId,
-                k -> new CopyOnWriteArrayList<>()
-        );
-        history.add(message);
-        while (history.size() > MAX_HISTORY) {
-            history.removeFirst();
+        Deque<Message> history = sessions.get(sessionId, k -> new ArrayDeque<>());
+        synchronized (history) {
+            history.addLast(message);
+            while (history.size() > MAX_HISTORY) {
+                history.pollFirst();
+            }
         }
     }
 
     public void clearSession(String sessionId) {
-        sessions.remove(sessionId);
+        sessions.invalidate(sessionId);
     }
 }
