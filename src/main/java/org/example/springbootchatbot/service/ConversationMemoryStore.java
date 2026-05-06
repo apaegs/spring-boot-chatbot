@@ -14,16 +14,15 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ConversationMemoryStore {
 
-    private static final int MAX_HISTORY = 20;
-
-    // Caffeine-cache som automatiskt tar bort sessioner
-    // som inte använts på X minuter eller när cachen är full
+    private final int maxHistory;
     private final Cache<String, Deque<Message>> sessions;
 
     public ConversationMemoryStore(
+            @Value("${conversation.session.max-history}") int maxHistory,
             @Value("${conversation.session.max-size}") int maxSize,
             @Value("${conversation.session.expire-minutes}") int expireMinutes
     ) {
+        this.maxHistory = maxHistory;
         this.sessions = Caffeine.newBuilder()
                 .maximumSize(maxSize)
                 .expireAfterAccess(expireMinutes, TimeUnit.MINUTES)
@@ -42,7 +41,7 @@ public class ConversationMemoryStore {
         Deque<Message> history = sessions.get(sessionId, k -> new ArrayDeque<>());
         synchronized (history) {
             history.addLast(message);
-            while (history.size() > MAX_HISTORY) {
+            while (history.size() > maxHistory) {
                 history.pollFirst();
             }
         }
