@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final org.apache.commons.logging.Log logger =
+            org.apache.commons.logging.LogFactory.getLog(GlobalExceptionHandler.class);
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult()
@@ -45,12 +48,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+        logger.error("Unexpected runtime exception", ex);
         return ResponseEntity
-                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(
-                        HttpStatus.SERVICE_UNAVAILABLE.value(),
-                        "Service unavailable",
-                        ex.getMessage(),
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "Internal server error",
+                        "An unexpected error occurred",
                         Instant.now()
                 ));
     }
