@@ -251,7 +251,15 @@
                 })
             });
 
-            if (!response.ok) throw new Error('Request failed');
+            if (!response.ok) {
+                try {
+                    const errorData = await response.json();
+                    appendMessage('bot', `** ERROR: ${errorData.error} — ${errorData.message} **`, null);
+                } catch {
+                    appendMessage('bot', '** ERROR: COULD NOT REACH AI SERVICE **', null);
+                }
+                return;
+            }
 
             const data = await response.json();
             appendMessage('bot', data.reply, capturedPersonality);

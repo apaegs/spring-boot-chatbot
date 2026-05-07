@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class AiClient {
@@ -39,9 +40,14 @@ public class AiClient {
     public String sendMessages(List<Message> messages) {
         var request = new AiRequest(model, messages);
 
+        String idempotencyKey = UUID.nameUUIDFromBytes(
+                messages.toString().getBytes()
+        ).toString();
+
         AiResponse response = restClient.post()
                 .uri("/chat/completions")
                 .header("Authorization", "Bearer " + apiKey)
+                .header("Idempotency-Key", idempotencyKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
