@@ -14,6 +14,13 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Client responsible for communicating with the external AI API (OpenRouter).
+ *
+ * <p>Sends a list of messages to the configured LLM model and returns the
+ * generated response. Automatically retries on transient failures (429, 503)
+ * using exponential backoff as configured in application properties.
+ */
 @Component
 public class AiClient {
 
