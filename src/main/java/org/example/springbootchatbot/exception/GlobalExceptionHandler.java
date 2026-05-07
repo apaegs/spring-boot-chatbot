@@ -31,6 +31,18 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(RetryableAiException.class)
+    public ResponseEntity<ErrorResponse> handleRetryableAiException(RetryableAiException ex) {
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse(
+                        HttpStatus.SERVICE_UNAVAILABLE.value(),
+                        "AI service temporarily unavailable",
+                        "The AI service failed after multiple attempts. Please try again later.",
+                        Instant.now()
+                ));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
         return ResponseEntity

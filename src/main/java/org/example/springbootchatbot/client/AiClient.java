@@ -1,13 +1,15 @@
 package org.example.springbootchatbot.client;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
+import org.example.springbootchatbot.exception.RetryableAiException;
 import org.example.springbootchatbot.model.AiRequest;
 import org.example.springbootchatbot.model.AiResponse;
 import org.example.springbootchatbot.model.Message;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.resilience.annotation.Retryable;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
@@ -28,6 +30,12 @@ public class AiClient {
         this.model = model;
     }
 
+    @Retryable(
+            includes = RetryableAiException.class,
+            maxRetriesString = "${ai.retry.max-retries}",
+            delayString = "${ai.retry.delay}",
+            multiplierString = "${ai.retry.multiplier}"
+    )
     public String sendMessages(List<Message> messages) {
         var request = new AiRequest(model, messages);
 
@@ -37,6 +45,9 @@ public class AiClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
+                .onStatus(status -> status.value() == 429 || status.value() == 503, (req, res) -> {
+                    throw new RetryableAiException("AI service temporarily unavailable: " + res.getStatusCode());
+                })
                 .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
                     throw new RuntimeException("AI service rejected the request: " + res.getStatusCode());
                 })
