@@ -1,16 +1,26 @@
 package org.example.springbootchatbot.client;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
+import org.example.springbootchatbot.exception.RetryableAiException;
 import org.example.springbootchatbot.model.AiRequest;
 import org.example.springbootchatbot.model.AiResponse;
 import org.example.springbootchatbot.model.Message;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.resilience.annotation.Retryable;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.UUID;
 
+/**
+ * Client responsible for communicating with the external AI API (OpenRouter).
+ *
+ * <p>Sends a list of messages to the configured LLM model and returns the
+ * generated response. Automatically retries on transient failures (429, 503)
+ * using exponential backoff as configured in application properties.
+ */
 @Component
 public class AiClient {
 
@@ -28,15 +38,29 @@ public class AiClient {
         this.model = model;
     }
 
-    public String sendMessages(List<Message> messages) {
+    @Retryable(
+            includes = RetryableAiException.class,
+            maxRetriesString = "${ai.retry.max-retries}",
+            delayString = "${ai.retry.delay}",
+            multiplierString = "${ai.retry.multiplier}"
+    )
+    public String sendMessages(List<Message> messages, String idempotencyKey) {
         var request = new AiRequest(model, messages);
+
+        String key = (idempotencyKey != null && !idempotencyKey.isBlank())
+                ? idempotencyKey
+                : UUID.randomUUID().toString();
 
         AiResponse response = restClient.post()
                 .uri("/chat/completions")
                 .header("Authorization", "Bearer " + apiKey)
+                .header("Idempotency-Key", key)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
+                .onStatus(status -> status.value() == 429 || status.value() == 503, (req, res) -> {
+                    throw new RetryableAiException("AI service temporarily unavailable: " + res.getStatusCode());
+                })
                 .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
                     throw new RuntimeException("AI service rejected the request: " + res.getStatusCode());
                 })
