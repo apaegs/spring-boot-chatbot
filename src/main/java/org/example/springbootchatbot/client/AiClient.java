@@ -11,7 +11,6 @@ import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,17 +44,17 @@ public class AiClient {
             delayString = "${ai.retry.delay}",
             multiplierString = "${ai.retry.multiplier}"
     )
-    public String sendMessages(List<Message> messages) {
+    public String sendMessages(List<Message> messages, String idempotencyKey) {
         var request = new AiRequest(model, messages);
 
-        String idempotencyKey = UUID.nameUUIDFromBytes(
-                messages.toString().getBytes(StandardCharsets.UTF_8)
-        ).toString();
+        String key = (idempotencyKey != null && !idempotencyKey.isBlank())
+                ? idempotencyKey
+                : UUID.randomUUID().toString();
 
         AiResponse response = restClient.post()
                 .uri("/chat/completions")
                 .header("Authorization", "Bearer " + apiKey)
-                .header("Idempotency-Key", idempotencyKey)
+                .header("Idempotency-Key", key)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()

@@ -7,6 +7,7 @@ import org.example.springbootchatbot.model.Message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ChatService {
@@ -34,7 +35,8 @@ public class ChatService {
 
         messages.add(new Message("user", userMessage));
 
-        String reply = aiClient.sendMessages(messages);
+        String requestId = UUID.randomUUID().toString();
+        String reply = aiClient.sendMessages(messages, requestId);
 
         if (sessionId != null && !sessionId.isBlank()) {
             conversationMemoryStore.addMessage(sessionId, new Message("user", userMessage));
