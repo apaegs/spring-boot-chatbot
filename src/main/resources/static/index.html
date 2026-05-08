@@ -92,7 +92,9 @@
             if (!response.ok) {
                 try {
                     const errorData = await response.json();
-                    appendMessage('bot', `** ERROR: ${errorData.error} — ${errorData.message} **`, null);
+                    const err = errorData?.error || errorData?.type || 'Unknown error';
+                    const msg = errorData?.message || errorData?.detail || 'No message provided';
+                    appendMessage('bot', `** ERROR: ${err} — ${msg} **`, null);
                 } catch {
                     appendMessage('bot', '** ERROR: COULD NOT REACH AI SERVICE **', null);
                 }

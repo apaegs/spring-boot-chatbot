@@ -11,6 +11,7 @@ import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,7 +49,7 @@ public class AiClient {
         var request = new AiRequest(model, messages);
 
         String idempotencyKey = UUID.nameUUIDFromBytes(
-                messages.toString().getBytes()
+                messages.toString().getBytes(StandardCharsets.UTF_8)
         ).toString();
 
         AiResponse response = restClient.post()
