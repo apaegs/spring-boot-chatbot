@@ -9,6 +9,7 @@ A Spring Boot middleware service for chatting with an LLM through different AI p
 - **music-nerd** — knows everything about every genre and artist, has strong opinions
 - **dungeon-master** — responds to everything like it's an epic fantasy quest
 - **expert-coder** — direct, precise, slightly impatient with vague questions
+- **default** — a friendly and helpful assistant
 
 ## Getting Started
 
@@ -46,6 +47,12 @@ Open `http://localhost:8080` and start chatting.
   "sessionId": "optional-session-id"
 }
 ```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| personality | String | Yes | Determines the system prompt. Options: `music-nerd`, `dungeon-master`, `expert-coder`, `default` |
+| message | String | Yes | The user's message |
+| sessionId | String | No | Used to maintain conversation history across requests |
 
 The `sessionId` is optional — include it if you want the AI to remember previous messages in the conversation.
 
