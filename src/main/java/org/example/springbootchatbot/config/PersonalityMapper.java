@@ -8,7 +8,7 @@ import java.util.Objects;
 public class PersonalityMapper {
 
     private static final String CONCISE_RESPONSE_SUFFIX =
-            "\\nKeep responses concise and to the point. Only elaborate when the question genuinely requires detail.";
+            "\nKeep responses concise and to the point. Only elaborate when the question genuinely requires detail.";
 
     public String getSystemPrompt(String personality) {
         return switch (Objects.toString(personality, "").toLowerCase()) {
