@@ -14,21 +14,30 @@ body {
 
 .window {
     border: 2px solid #fff7f8;
-    width: 640px;
+    width: 800px;
 }
 
-.titlebar {
+.titlebar,
+.input-titlebar {
     background: #fff7f8;
     color: #2b0f54;
     padding: 3px 8px;
-    font-size: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.titlebar .btns { display: flex; gap: 4px; }
-.titlebar .btn {
+.titlebar { font-size: 14px; }
+.input-titlebar { font-size: 13px; }
+
+.titlebar .btns,
+.input-titlebar .btns {
+    display: flex;
+    gap: 4px;
+}
+
+.titlebar .btn,
+.input-titlebar .btn {
     width: 14px;
     height: 14px;
     border: 2px solid #2b0f54;
@@ -92,7 +101,7 @@ body {
     display: inline-block;
     width: 8px;
     height: 12px;
-    background: #ff4f69;
+    background: #fff7f8;
     animation: blink 1s step-end infinite;
     vertical-align: middle;
 }
@@ -104,25 +113,6 @@ body {
 
 .input-area { border-top: 2px solid #fff7f8; }
 
-.input-titlebar {
-    background: #fff7f8;
-    color: #2b0f54;
-    padding: 3px 8px;
-    font-size: 13px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.input-titlebar .btns { display: flex; gap: 4px; }
-.input-titlebar .btn {
-    width: 14px;
-    height: 14px;
-    border: 2px solid #2b0f54;
-    background: #fff7f8;
-    cursor: pointer;
-}
-
 .input-row {
     display: flex;
     align-items: center;
@@ -131,7 +121,11 @@ body {
     background: #2b0f54;
 }
 
-.prompt { font-size: 14px; color: #fff7f8; white-space: nowrap; }
+.prompt {
+    font-size: 14px;
+    color: #fff7f8;
+    white-space: nowrap;
+}
 
 .input-row input {
     flex: 1;
