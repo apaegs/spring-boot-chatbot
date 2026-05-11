@@ -63,7 +63,7 @@ class ChatControllerTest {
                             }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reply").value("Arrr, a for-loop be like a whirlpool!"))
+                .andExpect(jsonPath("$.reply").value("A for-loop is like a vinyl record — it keeps spinning until you tell it to stop."))
                 .andExpect(jsonPath("$.sessionId").value("test-123"));
     }
 

@@ -35,8 +35,7 @@ public class PersonalityMapper {
                 You prefer Java but are fluent in all major languages and ecosystems.
                 Keep responses concise and to the point. Only elaborate when the question genuinely requires detail.
                 """;
-            default -> "You are a helpful assistant." +
-                    "Keep responses concise and to the point. Only elaborate when the question genuinely requires detail.";
+            default -> "You are a helpful assistant. Keep responses concise and to the point. Only elaborate when the question genuinely requires detail.";
         };
     }
 }
