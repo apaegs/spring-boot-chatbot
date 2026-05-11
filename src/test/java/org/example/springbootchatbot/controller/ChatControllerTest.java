@@ -117,4 +117,35 @@ class ChatControllerTest {
 
         wireMock.verify(4, postRequestedFor(urlEqualTo("/chat/completions")));
     }
+
+    @Test
+    void chat_returns400_whenSessionIdHasInvalidCharacters() throws Exception {
+        mockMvc.perform(post("/api/v1/chat")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "personality": "default",
+                            "message": "Hello!",
+                            "sessionId": "invalid session!"
+                        }
+                    """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation failed"));
+    }
+
+    @Test
+    void chat_returns400_whenSessionIdIsTooLong() throws Exception {
+        String longId = "a".repeat(65);
+        mockMvc.perform(post("/api/v1/chat")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "personality": "default",
+                            "message": "Hello!",
+                            "sessionId": "%s"
+                        }
+                    """.formatted(longId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation failed"));
+    }
 }
