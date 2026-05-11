@@ -46,7 +46,7 @@ class ChatControllerTest {
                                     {
                                         "message": {
                                             "role": "assistant",
-                                            "content": "Arrr, a for-loop be like a whirlpool!"
+                                            "content": "A for-loop is like a vinyl record — it keeps spinning until you tell it to stop."
                                         }
                                     }
                                 ]
