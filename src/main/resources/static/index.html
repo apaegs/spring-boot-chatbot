@@ -71,8 +71,8 @@
         const capturedPersonality = currentPersonality;
 
         input.value = '';
-        setLoading(true);
         appendMessage('user', message, null);
+        setLoading(true);
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 60000);
@@ -151,7 +151,7 @@
             const div = document.createElement('div');
             div.classList.add('msg', 'bot');
             div.id = 'typing';
-            div.innerHTML = '<div class="lbl">// SYSTEM</div>PROCESSING<span class="cursor"></span>';
+            div.innerHTML = '<div class="lbl">// SYSTEM</div>PROCESSING <span class="cursor"></span>';
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
         } else {
