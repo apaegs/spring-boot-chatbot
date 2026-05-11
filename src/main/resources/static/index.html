@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chatbot</title>
     <link rel="stylesheet" href="/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 </head>
 <body>
 
@@ -18,10 +20,10 @@
     </div>
 
     <div class="pills">
-        <button class="pill active" onclick="selectPersonality('music-nerd', this)">MUSIC_NERD</button>
+        <button class="pill" onclick="selectPersonality('music-nerd', this)">MUSIC_NERD</button>
         <button class="pill" onclick="selectPersonality('dungeon-master', this)">DUNGEON_MASTER</button>
         <button class="pill" onclick="selectPersonality('expert-coder', this)">EXPERT_CODER</button>
-        <button class="pill" onclick="selectPersonality('default', this)">DEFAULT</button>
+        <button class="pill active" onclick="selectPersonality('default', this)">DEFAULT</button>
     </div>
 
     <div class="messages" id="messages">
@@ -53,7 +55,7 @@
 </div>
 
 <script>
-    let currentPersonality = 'music-nerd';
+    let currentPersonality = 'default';
     let sessionId = crypto.randomUUID();
 
     function selectPersonality(personality, el) {
@@ -124,8 +126,8 @@
         label.textContent = role === 'user' ? '// YOU' : '// ' + (personality ? personality.toUpperCase() : 'SYSTEM');
         div.appendChild(label);
 
-        const content = document.createElement('span');
-        content.textContent = text;
+        const content = document.createElement('div');
+        content.innerHTML = DOMPurify.sanitize(marked.parse(text));
         div.appendChild(content);
 
         if (role === 'bot') {
