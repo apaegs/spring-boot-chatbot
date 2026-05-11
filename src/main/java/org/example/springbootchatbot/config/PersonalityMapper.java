@@ -4,6 +4,20 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+/**
+ * Maps a personality identifier to a system prompt used to configure the AI's behavior.
+ *
+ * <p>The personality determines the tone, style, and focus of the AI's responses.
+ * If an unknown or null personality is provided, a generic helpful assistant prompt is used as a fallback.
+ *
+ * <p>Supported personalities:
+ * <ul>
+ *   <li>{@code music-nerd} — an opinionated music enthusiast with encyclopedic knowledge</li>
+ *   <li>{@code dungeon-master} — a dramatic storyteller framing everything as a fantasy quest</li>
+ *   <li>{@code expert-coder} — a senior engineer who values precision and best practices</li>
+ *   <li>{@code default} — a friendly and helpful general-purpose assistant</li>
+ * </ul>
+ */
 @Component
 public class PersonalityMapper {
 
